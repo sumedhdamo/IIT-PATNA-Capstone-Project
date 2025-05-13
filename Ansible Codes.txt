@@ -58,30 +58,15 @@ ansible windows -i /AD-project/dcdiag/hosts.ini -m win_ping
 
 
 
-if not successfull,enable Winrm,PSSession on remote machines
+if not successfull,enable Winrm,PSSession on remote machines ##Please check PowershellCode.txt file under the main repository
 
 -------------------------------------------------------------------------------------------
-# Enable PowerShell remoting
-Enable-PSRemoting -Force
-Restart-Service WinRM
 
-# Clean and recreate WinRM HTTP listener
-$listener = winrm enumerate winrm/config/listener | Select-String Transport=HTTP
-if ($listener) { winrm delete winrm/config/listener?Address=*+Transport=HTTP }
-winrm create winrm/config/listener?Address=*+Transport=HTTP "@{Port='5985';Hostname='';Enabled='true'}"
-
-# Allow unencrypted + Kerberos auth
-winrm set winrm/config/service '@{AllowUnencrypted="true"}'
-winrm set winrm/config/service/auth '@{Kerberos="true";Basic="false"}'
-
-# Grant py@DAMOPRO.IN access to PowerShell Remoting
-Set-PSSessionConfiguration -Name Microsoft.PowerShell -ShowSecurityDescriptorUI
-
----------------------------------------------------------------------------------------------
 Create folder called scripts /AD-Project/dcdiag/scripts/
 Creating .ps1 inside scripts, dcdiag-report.ps1
 
-sudo nano /AD-Project/dcdiag/scripts/dcdiag-report.ps1
+sudo nano /AD-Project/dcdiag/scripts/dcdiag-report.ps1 ########Please check PowershellCode.txt file under the main repository
+
 ------------------------------------------------------------------------------------------
 Create playbook folder, add yaml file in it called dcdiag-reports.yml
 

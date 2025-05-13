@@ -8,7 +8,7 @@
 # Technologies Used
  - Ansible
  - Powershell
- - Python(modules: 'os' , 'datetime' ,'yaml')
+ - Python(modules: 'os' , 'datetime' ,'yagmail')
  - Windows Task Scheduler
  - Active Directory
  - Linux(Ansible Control)
@@ -20,7 +20,7 @@
 
    AnsibleCode.txt
    - Objective of Ansible is to push out the dcdiag scripts to all Domain controllers(dcdiag-report.yml)
-   - It also creates a schedule task on all dcs so that the dcdiag script will runn evryday(schtask.yml)
+   - It is also used in pushing out a script to all DCs ,that schedule the task on all dcs so that the dcdiag script will runn evryday(schtask.yml)
 
    PowershellCode.txt
    - It has dcdiag and repadmin health check script.

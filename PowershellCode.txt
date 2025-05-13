@@ -1,0 +1,30 @@
+##This is the powershell command to run the dcdiag and repadmin /showrepl on the DC
+##Result saves in your $basepath, in my case it was \\w10-Client\AdReports, make sure the directory exists!!
+
+----------------------------------------------------------------------------------------------------
+
+$hostname = $env:COMPUTERNAME
+$date = Get-Date -Format "yyyyMMdd_HHmmss"
+$basePath = "\\W10-CLIENT\ADReports\$hostname"
+
+# Ensure per-DC folder exists
+if (!(Test-Path $basePath)) {
+    New-Item -Path $basePath -ItemType Directory | Out-Null
+}
+
+# Save DCDIAG output
+dcdiag /i | ForEach-Object {
+    if ($_ -match "\.+\s(.+test.+)$") {
+        $matches[1]
+    }
+} | Out-File "$basePath\dcdiag-$date.txt" -Encoding UTF8
+
+# Run DNS test separately and append to file
+"--- DNS Test Output ---" | Out-File "$basePath\dcdiag-$date.txt" -Append -Encoding UTF8
+dcdiag /test:dns | Out-File "$basePath\dcdiag-$date.txt" -Append -Encoding UTF8
+
+# Save REPADMIN output
+repadmin /showrepl * /csv | Out-File "$basePath\repadmin-$date.csv" -Encoding UTF8
+
+
+-------------------------------------------------------------------------------------------------------

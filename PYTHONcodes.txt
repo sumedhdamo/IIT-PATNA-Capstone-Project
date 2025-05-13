@@ -55,7 +55,7 @@ except Exception as e:
 
 # Email config
 sender = 'damodare.sumedh@gmail.com'
-app_password = 'vgxn nupi hpnf tfbm'  # Use app password for Gmail or similar
+app_password = 'xxxx xxxx xxxx xxxx'  # Use app password for Gmail or similar
 recipient = ['damodare.sumedh@gmail.com','damodaresumedh5@gmail.com']
 
 # Create a message from captured output

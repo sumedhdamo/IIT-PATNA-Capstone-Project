@@ -1,0 +1,138 @@
+Creating Ansible Inventory
+
+We are using Kerberos Auhentication for Winrm, using http.
+
+1)sudo apt install krb5-user -y
+
+2)editing /etc/krb5.conf
+
+[libdefaults]
+    default_realm = DAMOPRO.IN
+    dns_lookup_realm = true
+    dns_lookup_kdc = true
+    forwardable = true
+    kdc_timesync = 1
+    ccache_type = 4
+    proxiable = true
+    fcc-mit-ticketflags = true
+
+[realms]
+    DAMOPRO.IN = {
+        kdc = dc-01.damopro.in
+        admin_server = dc-01.damopro.in
+    }
+
+[domain_realm]
+    .damopro.in = DAMOPRO.IN
+    damopro.in = DAMOPRO.IN
+
+3)create dns entry on ubuntu:
+sudo nano /etc/resolv.conf
+
+---------------------------------------------------------
+Verify kerberos
+
+kinit py@DAMOPRO.IN
+klist
+
+---------------------------------------------------------
+Creating Inventory by editing host.ini
+
+[windows]
+dc-01 ansible_host=192.168.1.17
+dc-02 ansible host=192.168.1.34
+
+[windows:vars]
+ansible_user=py@DAMOPRO.IN
+ansible_connection=winrm
+ansible_winrm_transport=kerberos
+ansible_port=5985
+ansible_winrm_scheme=http
+ansible_winrm_server_cert_validation=ignore
+
+-----------------------------------------------------------
+
+To check if the connection is successfull :
+
+ansible windows -i /AD-project/dcdiag/hosts.ini -m win_ping
+
+
+
+if not successfull,enable Winrm,PSSession on remote machines
+
+-------------------------------------------------------------------------------------------
+# Enable PowerShell remoting
+Enable-PSRemoting -Force
+Restart-Service WinRM
+
+# Clean and recreate WinRM HTTP listener
+$listener = winrm enumerate winrm/config/listener | Select-String Transport=HTTP
+if ($listener) { winrm delete winrm/config/listener?Address=*+Transport=HTTP }
+winrm create winrm/config/listener?Address=*+Transport=HTTP "@{Port='5985';Hostname='';Enabled='true'}"
+
+# Allow unencrypted + Kerberos auth
+winrm set winrm/config/service '@{AllowUnencrypted="true"}'
+winrm set winrm/config/service/auth '@{Kerberos="true";Basic="false"}'
+
+# Grant py@DAMOPRO.IN access to PowerShell Remoting
+Set-PSSessionConfiguration -Name Microsoft.PowerShell -ShowSecurityDescriptorUI
+
+---------------------------------------------------------------------------------------------
+Create folder called scripts /AD-Project/dcdiag/scripts/
+Creating .ps1 inside scripts, dcdiag-report.ps1
+
+sudo nano /AD-Project/dcdiag/scripts/dcdiag-report.ps1
+------------------------------------------------------------------------------------------
+Create playbook folder, add yaml file in it called dcdiag-reports.yml
+
+
+
+- name: Copy dcdiag-report.ps1 to all DCs
+  hosts: windows
+  gather_facts: no
+  tasks:
+
+    - name: Ensure C:\Scripts exists
+      ansible.windows.win_file:
+        path: C:\Scripts
+        state: directory
+
+    - name: Copy dcdiag-report.ps1 script to DCs
+      ansible.windows.win_copy:
+        src: ../scripts/dcdiag-report.ps1
+        dest: C:\Scripts\dcdiag-report.ps1
+--------------------------------------------------------------------------------------------------
+
+Run this command for your playbook to run and push the script:
+
+ansible-playbook -i /AD-project/dcdiag/hosts.ini dcdiag-reports.yml -vvv
+
+-----------------------------------------------------------------------------------------------------
+
+Create playbook folder, add yaml file in it called schtask.yml  ##This creates a scheduled task that will run everyday @11PM UTC
+
+
+
+- name: ADHealthcheck
+  hosts: windows
+  gather_facts: no
+  tasks:
+
+    - name: Create scheduled task for dcdiag-report.ps1
+      community.windows.win_scheduled_task:
+        name: ADHealthCheck
+        description: Daily AD health check (dcdiag + repadmin)
+        actions:
+          - path: powershell.exe
+            arguments: "-ExecutionPolicy Bypass -File C:\\Scripts\\dcdiag-report.ps1"
+        triggers:
+          - type: daily
+            start_boundary: '2025-05-11T13:00:00'
+        username: SYSTEM
+        run_level: highest
+        state: present
+-----------------------------------------------------------------------------------------------------
+
+Run this command for your playbook to run and push the script:
+
+ansible-playbook -i /AD-project/dcdiag/hosts.ini schtask.yml -vvv

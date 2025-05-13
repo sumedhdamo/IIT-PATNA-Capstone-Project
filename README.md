@@ -2,7 +2,7 @@
 #  This capstone project automates the health check of all Domain controllers in the domain 
 
 # Objectives 
- - Automate 'Dcdiag' and 'repadmin' report ,collectr and it and store it in the Centralized repository(server)
+ - Automate 'Dcdiag' and 'repadmin' report ,collect and store it in the Centralized repository(server)
  - Schedule the health and check and deliver this to the stakeholders via email
 
 # Technologies Used

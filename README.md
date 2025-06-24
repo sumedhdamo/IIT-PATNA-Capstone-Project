@@ -17,6 +17,7 @@
 - AnsibleCode.txt
 - PowerShellCode.txt
 - PYTHON_dcdiag.py
+- Retention.ps1(optional)
 
    AnsibleCode.txt
    - Objective of Ansible is to push out the dcdiag scripts to all Domain controllers(dcdiag-report.yml)
@@ -29,5 +30,8 @@
    PYTHON_dcdiag.py
    - A Python code that check the result of the report and looks for any failures and deliver the report to stakeholders via email
 
+   Retention.ps1(optional)
+   - This scripts deleted the files from the folder which are older than 7 days, so you dont have to manually delete it if folder size grows.
+   - 
 # Sample Output 
 ![image](https://github.com/user-attachments/assets/250ccef9-59cc-436e-b70c-006f9c513f3c)

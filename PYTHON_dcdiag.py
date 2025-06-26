@@ -6,7 +6,7 @@ import yagmail
 BASE_DIR = r'\\W10-CLIENT\ADReports'
 LOG_FILE = r'E:\ADReportScript\ad_health_log.txt'
 SENDER = 'damodare.sumedh@gmail.com'
-APP_PASSWORD = 'vgxn nupi hpnf tfbm'
+APP_PASSWORD = 'vXxxxx xxxxX'
 RECIPIENTS = ['damodare.sumedh@gmail.com', 'damodaresumedh5@gmail.com']
 
 def get_latest_txt(folder_path):
